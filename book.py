@@ -4,11 +4,11 @@ from nltk.corpus import stopwords, wordnet
 from nltk.stem import WordNetLemmatizer
 import csv
 import ast
-'''
+
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
-'''
+
 
 class Book():
     '''
@@ -151,7 +151,7 @@ def csv_to_list_of_dicts(filename):
 
 
 
-a = Book("9781338878929", "magical", ["page0", "page1", "page2"])
+a = Book("9781338878929", "magical", ["Harry was a wizard, but he didn't know it.", "He went to a school for wizardry.", "He defeated the evil wizard and won the day."])
 print(a.title)
 print(a.search_text("Harry"))
 exit()
