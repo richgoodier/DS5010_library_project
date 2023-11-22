@@ -9,6 +9,17 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
+class Library():
+    def __init__(self):
+        self.list = []
+    
+    def list_titles(self):
+        for book in self.list:
+            print(book.title)
+    
+    def add_book(self, book):
+        self.list.append(book)
+
 
 class Book():
     '''
@@ -32,7 +43,7 @@ class Book():
 
     def __str__(self):
         '''Returns basic info of the book.'''
-        return f"Title: {self.title} Author: {self.author} Genre: {self.genre}"
+        return f"Title: {self.title} Author: {self.authors[0]} Genre: {self.genre}"
     
     def __len__(self):
         '''Returns the number of pages'''
@@ -114,11 +125,10 @@ class Book():
         param s: a string to calculate tokens
         returns: a dictionary word_count of tokens and their counts
         '''
-        print("tokenizing text...")
         words = []
         for page in self.text:
             words.extend(self.tokenize(page))
-
+        
         word_count = {}
         for word in words:
             if word in word_count:
@@ -138,28 +148,27 @@ class Book():
                 return theme_words
 
 
-def csv_to_list_of_dicts(filename):
-    with open(filename, 'r') as file:
-        reader = csv.DictReader(file)
-        books = []
+def csv_to_dict(csv_file):
+    books_dict = []
+    with open(csv_file, mode='r', encoding='utf-8') as file:
+        reader = csv.reader(file)
         for row in reader:
-            # Convert the "Text" field from a string representation of a list into an actual list
-            row['Text'] = ast.literal_eval(row['Text'])
-            books.append(row)
-    
-    return books
+            book = {
+                "isbn": row[0],
+                "genre": row[1],
+                "text": ast.literal_eval(row[2])
+            }
+            books_dict.append(book)
+    return books_dict
 
 
+my_libary = Library()
 
-a = Book("9781338878929", "magical", ["Harry was a wizard, but he didn't know it.", "He went to a school for wizardry.", "He defeated the evil wizard and won the day."])
-print(a.title)
-print(a.search_text("Harry"))
-exit()
-
-print("Loading books...", end='', flush=True)
-books = csv_to_list_of_dicts('books.csv')
-print("books loaded")
+books = csv_to_dict('sample_books.csv')
 for book in books:
-    book_data = Book(book["isbn"], book["Genre"], book["Text"])
+    book_data = Book(book["isbn"], book["genre"], book["text"])
     print(book_data)
     print(book_data.themes(10))
+    my_libary.add_book(book_data)
+
+my_libary.list_titles()
