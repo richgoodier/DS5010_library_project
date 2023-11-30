@@ -10,7 +10,6 @@ nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
 
-
 class Library():
     def __init__(self):
       self.list = []
@@ -27,19 +26,20 @@ class Library():
       #removes book from library
       self.list.remove(book)
 
-    def search_book_title(self, title):
+    def search_by_title(self, title):
         # Search for a book by title
         for book in self.list:
             if book.title.lower() == title.lower():
                 return book
         return None
 
-    def search_quote(self, quote):
+    def search_by_quote(self, quote):
         # Search for a book by a quote
         found_books = []
         for book in self.list:
-            if quote.lower() in book.quotes.lower():
-                found_books.append(book)
+          for page in book.text:
+              if quote.lower() in page.lower():
+                  found_books.append(book.title)
         return found_books
 
     def sort_by_author(self):
@@ -142,11 +142,26 @@ class Library():
 
     def favorite_book(self, title):
       #Need further discussion on how we want to do this, 0 and 1 for favorite True or False check, in book data?
-      book = search_book_title(title)
+      book = self.search_by_title(title)
       if book is None:
-        return None
+        return ValueError("No book found")
       else:
-        ...
+        book.set_favorite(1)
+
+    def unfavorite_book(self, title):
+      #Need further discussion on how we want to do this, 0 and 1 for favorite True or False check, in book data?
+      book = self.search_by_title(title)
+      if book is None:
+        return ValueError("No book found")
+      else:
+        book.set_favorite(0)
+
+    def list_favorites(self):
+      favorite_books = []
+      for book in self.list:
+        if book.get_favorite() == 1:
+          favorite_books.append(book.title)
+      return favorite_books
 
 class Book():
     '''
@@ -155,12 +170,12 @@ class Book():
     stopword_list = set(stopwords.words('english'))
     lemmatizer = WordNetLemmatizer()
 
-    def __init__(self, isbn = None,  genre = None, text = None, bookmark = 0):
+    def __init__(self, isbn = None,  genre = None, text = None):
         '''Initializes a book'''
         self.isbn = isbn
         self.genre = genre
         self.text = text if text is not None else []
-        self.bookmark = bookmark
+        self.bookmark = 0
         self.favorite = 0
         self.page_count = len(self.text)
         self.word_count = self.count_words()
@@ -198,11 +213,22 @@ class Book():
 
     def set_bookmark(self, page):
         '''Sets the bookmark to a page'''
-        self.bookmark = page
+        if page < self.page_count:
+          self.bookmark = page
+        else:
+          return IndexError("No page found")
 
     def reset_bookmark(self):
         '''Resets the bookmark to the beginning of the book'''
         self.bookmark = 0
+
+    def get_favorite(self):
+        '''Returns the page number of the bookmark'''
+        return self.favorite
+
+    def set_favorite(self, number):
+        '''Sets the bookmark to a page'''
+        self.favorite = number
 
     def search_text(self, quotation):
         pages_found = []
@@ -289,8 +315,7 @@ def csv_to_dict(csv_file):
             books_dict.append(book)
     return books_dict
 
-
-my_libary = Library()
+my_library = Library()
 
 books = csv_to_dict('sample_books.csv')
 for book in books:
@@ -298,6 +323,10 @@ for book in books:
     print(book_data)
     print(book_data.themes(10))
     print(book_data.page_count)
-    my_libary.add_book(book_data)
+    my_library.add_book(book_data)
 
-my_libary.list_titles()
+print(my_library.search_by_title("The Great Gatsby").get_favorite())
+my_library.favorite_book("The Great Gatsby")
+print(my_library.search_by_title("The Great Gatsby").get_favorite())
+
+my_library.freq_genre()
