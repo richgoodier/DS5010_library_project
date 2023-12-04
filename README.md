@@ -72,9 +72,9 @@ favorite_books = my_library.list_favorites()
 ## Authors
 
  - Albert Yildirim
- - Teja Ramana Modukuru
  - Rich Goodier
  - Suchita Sharma
+ - Teja Ramana Modukuru
 
 ## License
 
