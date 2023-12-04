@@ -5,11 +5,11 @@ from nltk.stem import WordNetLemmatizer
 import csv
 import ast
 import matplotlib.pyplot as plt
-
+'''
 nltk.download('stopwords')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('wordnet')
-
+'''
 class Library():
     def __init__(self):
       self.list = []
@@ -123,20 +123,20 @@ class Library():
         #for loop for all books in self.list
       for book in self.list:
         #grabbing values for bookmark and title
-        bookmark = book.bookmark
+        bookmark = book.get_bookmark()
         title = book.title
 
         #checking if statement for books if they have not started, currently reading, or completed
         if bookmark == 0:
               page_check_dict[title] = 'Not Started'
 
-        #This does not accuratly check read progress due to no page count currently in code
+        #if bookmark is equal to the pagecount of the book, then that would mean it is completed
+        elif bookmark == self.page_count:
+              page_check_dict[title] = 'Completed'
+
+        #if the bookmark is greater then 0 then that means that the book is currently in progress of being read
         elif bookmark > 0:
               page_check_dict[title] = 'Reading in Progress'
-
-        #This does not accuratly check completed due to no page count currently in code
-        elif bookmark < 0:
-              page_check_dict[title] = 'Completed'
 
       return page_check_dict
 
@@ -165,35 +165,72 @@ class Library():
 
 class Book():
     '''
-    Defines a book
+    Represents a book with attributes like ISBN, genre, text, and more. 
+    It provides functionalities such as fetching book information using ISBN,
+    managing reading progress, and analyzing the text for themes and word frequencies.
     '''
     stopword_list = set(stopwords.words('english'))
     lemmatizer = WordNetLemmatizer()
 
-    def __init__(self, isbn = None,  genre = None, text = None):
-        '''Initializes a book'''
-        self.isbn = isbn
+    def __init__(self, isbn,  genre = None, text = None):
+        '''
+        Initializes a new instance of the Book class.
+
+        Args:
+            isbn (str): The ISBN number of the book.
+            genre (str, optional): The genre of the book.
+            text (list of str, optional): The text content of the book, split into a list of pages.
+
+        Raises:
+            TypeError: If the ISBN is not provided.
+            ValueError: If provided ISBN is invalid.
+        '''
+        if isbn is None:
+          raise TypeError("ISBN number is required before proceeding.")
+        else:
+          self.isbn = isbn
         self.genre = genre
         self.text = text if text is not None else []
-        self.bookmark = 0
-        self.favorite = 0
-        self.page_count = len(self.text)
-        self.word_count = self.count_words()
         book_info = self.get_book_info()
         if book_info == 'Invalid ISBN':
             raise ValueError(book_info)
         else:
             self.title, self.authors, self.publisher, self.year = book_info
+        self._bookmark = 0
+        self._favorite = 0
+        self.page_count = len(self.text)
+        self.word_count = self.count_words()
+        self.word_dict = self.tally_words()
 
     def __str__(self):
-        '''Returns basic info of the book.'''
+        '''
+        Returns a string representation of the book, including title, author, and genre.
+
+        Returns:
+            str: A string representation of the book.
+        '''
         return f"Title: {self.title} Author: {self.authors[0]} Genre: {self.genre}"
 
     def __len__(self):
-        '''Returns the number of pages'''
+        '''
+        Returns the total number of pages in the book.
+
+        Returns:
+            int: The total number of pages.
+        '''
         return len(self.text)
 
     def get_book_info(self):
+        '''
+        Fetches and returns detailed information about the book using its ISBN.
+
+        Returns:
+            tuple: A tuple containing the title, authors, publisher, and year of the book.
+            str: 'Invalid ISBN' if the ISBN is not valid.
+
+        Raises:
+            isbnlib._exceptions.NotValidISBNError: If the ISBN is not valid.
+        '''
         try:
             #Get book information
             book = isbnlib.meta(self.isbn)
@@ -208,29 +245,61 @@ class Book():
             return 'Invalid ISBN'
 
     def get_bookmark(self):
-        '''Returns the page number of the bookmark'''
-        return self.bookmark
+        '''
+        Retrieves the current bookmark page number.
+
+        Returns:
+            int: The page number where the bookmark is set.
+        '''
+        return self._bookmark
 
     def set_bookmark(self, page):
-        '''Sets the bookmark to a page'''
+        '''
+        Sets the bookmark to a specified page number.
+
+        Args:
+            page (int): The page number to set the bookmark.
+
+        Returns:
+            IndexError: If the specified page number is beyond the book's length.
+        '''
         if page < self.page_count:
-          self.bookmark = page
+          self._bookmark = page
         else:
           return IndexError("No page found")
 
     def reset_bookmark(self):
         '''Resets the bookmark to the beginning of the book'''
-        self.bookmark = 0
+        self._bookmark = 0
 
     def get_favorite(self):
-        '''Returns the page number of the bookmark'''
-        return self.favorite
+        '''
+        Checks whether the book is marked as favorite.
+
+        Returns:
+            int: The favorite status (0 for not favorite, 1 for favorite).
+        '''
+        return self._favorite
 
     def set_favorite(self, number):
-        '''Sets the bookmark to a page'''
-        self.favorite = number
+        '''
+        Sets the favorite status of the book to favorite (1) or not favorite (0).
+
+        Args:
+            number (int): The value to set the favorite status (0 or 1).
+        '''
+        self._favorite = number
 
     def search_text(self, quotation):
+        '''
+        Searches for a given quotation in the book's text.
+
+        Args:
+            quotation (str): The quotation to search for.
+
+        Returns:
+            list of int: A list of page numbers where the quotation is found, or None if not found.
+        '''
         pages_found = []
         for i in range(len(self.text)):
             if quotation in self.text[i]:
@@ -243,7 +312,16 @@ class Book():
     @staticmethod
     def get_wordnet_pos(treebank_tag):
         '''
-        Map treebank POS tag to first character used by WordNetLemmatizer
+        Maps a POS (Part-Of-Speech) tag from the Penn Treebank project to a format recognized by the WordNetLemmatizer.
+
+        This method simplifies the conversion of tags like 'NN', 'VB', 'JJ', and 'RB' to their corresponding
+        simple WordNet POS tags: NOUN, VERB, ADJ, and ADV respectively.
+
+        Args:
+            treebank_tag (str): A POS tag from the Penn Treebank tagset.
+
+        Returns:
+            str: A simplified POS tag compatible with the WordNetLemmatizer.
         '''
         tag = {
             'J': wordnet.ADJ,
@@ -256,45 +334,77 @@ class Book():
 
     def tokenize(self, page):
         '''
-        Creates a list of tokens from a string
-        param page: a string to calculate tokens
-        returns: a list y of all tokens contained in string page
+        Tokenizes the given text page into words, excluding stopwords.
+
+        Args:
+            page (str): The text of the page to tokenize.
+
+        Returns:
+            list of str: A list of tokenized words.
         '''
         words = page.split()
 
+        '''
+        The following step is necessary to prevent the lemmatizer from making mistakes 
+        like considering 'was' a noun and removing the 's' in order to singularize it.
+        '''
         tokens_with_pos = nltk.pos_tag(words)
 
         y = []
         for word, pos in tokens_with_pos:
             new_word = "".join([char.lower() for char in word if char.isalnum()])
             lemmatized_word = self.lemmatizer.lemmatize(new_word, pos=Book.get_wordnet_pos(pos))
-            if lemmatized_word == "wa": # debugging
-                print(word + ":" + new_word)
             if lemmatized_word not in self.stopword_list:
                 y.append(lemmatized_word)
         return y
 
-    def count_words(self):
+    def tally_words(self):
         '''
-        Creates a dictionary  with keys from the tokens of a string and values representing the count for that token
-        param s: a string to calculate tokens
-        returns: a dictionary word_count of tokens and their counts
+        Counts the frequency of each word in the book's text.
+
+        Returns:
+            dict: A dictionary mapping words to their frequency counts.
         '''
         words = []
         for page in self.text:
             words.extend(self.tokenize(page))
 
-        word_count = {}
+        word_tally = {}
         for word in words:
-            if word in word_count:
-                word_count[word] += 1
+            if word in word_tally:
+                word_tally[word] += 1
             else:
-                word_count[word] = 1
+                word_tally[word] = 1
 
-        return word_count
+        return word_tally
+    
+    def count_words(self):
+      '''
+      Counts the total number of words in the text of the book.
+
+      This method iterates through each page in the book's text, splitting the page into words based on spaces, 
+      and then sums up the count of words across all pages.
+
+      Returns:
+          int: The total number of words in the book's text.
+      '''
+      word_count = 0
+      for page in self.text:
+        words = page.split()
+        word_count += len(words)
+      return word_count
 
     def themes(self, theme_count = 5):
-        sorted_words = sorted(self.word_count.items(), key=lambda item: item[1], reverse=True)
+        '''
+        Identifies the most frequent themes (words) in the book.
+
+        Args:
+            theme_count (int, optional): The number of themes to identify. Defaults to 5.
+
+        Returns:
+            list of str: A list of the most frequent words in the book.
+        '''
+        sorted_words = sorted(self.word_dict.items(), key=lambda item: item[1], reverse=True)
         theme_words = []
         for word in sorted_words:
             theme_words.append(word[0])
@@ -303,6 +413,25 @@ class Book():
                 return theme_words
 
 def csv_to_dict(csv_file):
+    '''
+    Converts a CSV file into a list of dictionaries, each representing a book.
+
+    This function reads a CSV file where each row represents a book. It expects each row to have 
+    at least three fields: ISBN, genre, and text. The 'text' field should be a string representation
+    of a list, which is converted back into a list using `ast.literal_eval`.
+
+    Args:
+        csv_file (str): The path to the CSV file to be read.
+
+    Returns:
+        list of dict: A list where each dictionary contains the details of a book. Each dictionary 
+                      has keys 'isbn', 'genre', and 'text', corresponding to the values in each row of the CSV file.
+
+    Raises:
+        FileNotFoundError: If the specified CSV file does not exist.
+        ValueError: If the 'text' field in a row cannot be converted to a list.
+        IndexError: If a row in the CSV file does not contain the expected number of fields.
+    '''
     books_dict = []
     with open(csv_file, mode='r', encoding='utf-8') as file:
         reader = csv.reader(file)
@@ -322,11 +451,15 @@ for book in books:
     book_data = Book(book["isbn"], book["genre"], book["text"])
     print(book_data)
     print(book_data.themes(10))
-    print(book_data.page_count)
+    print(f"pages: {book_data.page_count} words: {book_data.word_count}")
     my_library.add_book(book_data)
+
+
 
 print(my_library.search_by_title("The Great Gatsby").get_favorite())
 my_library.favorite_book("The Great Gatsby")
+print(my_library.search_by_title("The Great Gatsby").get_favorite())
+my_library.unfavorite_book("The Great Gatsby")
 print(my_library.search_by_title("The Great Gatsby").get_favorite())
 
 my_library.freq_genre()
