@@ -514,6 +514,7 @@ class Book():
             if theme_count == 0:
                 return theme_words
 
+
 def csv_to_dict(csv_file):
     '''
     Converts a CSV file into a list of dictionaries, each representing a book.
@@ -548,22 +549,4 @@ def csv_to_dict(csv_file):
 
 
 if __name__ == '__main__':
-    my_library = Library()
-
-    books = csv_to_dict('../sample_books.csv')
-    for book in books:
-        book_data = Book(book["isbn"], book["genre"], book["text"])
-        print(book_data)
-        print(book_data.themes(10))
-        print(f"pages: {book_data.page_count} words: {book_data.word_count}")
-        my_library.add_book(book_data)
-
-
-
-    print(my_library.search_by_title("The Great Gatsby").get_favorite())
-    my_library.favorite_book("The Great Gatsby")
-    print(my_library.search_by_title("The Great Gatsby").get_favorite())
-    my_library.unfavorite_book("The Great Gatsby")
-    print(my_library.search_by_title("The Great Gatsby").get_favorite())
-
-    my_library.freq_genre()
+    ...
