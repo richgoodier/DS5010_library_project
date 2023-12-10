@@ -39,12 +39,20 @@ my_library.list_titles()
 my_library.remove_book(book)
 ```
 
-### Searching and Sorting
+### Searching and Sorting Books
 
 ```python
 found_book = my_library.search_by_title("Book Title")
 books_with_quote = my_library.search_by_quote("a specific quote")
 my_library.sort_by_author()
+```
+
+### Bookmark Page and Favorite Books
+
+```python
+book.set_bookmark(100)
+my_library.favorite_book("Book Title")
+favorite_books = my_library.list_favorites()
 ```
 
 ### Visualization and CSV Operations
@@ -54,20 +62,15 @@ my_library.freq_author()
 my_library.freq_genre()
 my_library.export_to_csv("library_data.csv")
 ```
+#### Example Visualization
+![Example Visualization](images/genre_freq.png)
 
-### Bookmark and Favorites
-
-```python
-book.set_bookmark(100)
-my_library.favorite_book("Book Title")
-favorite_books = my_library.list_favorites()
-```
 
 ### Additional Features
 
-- **Word Count**: Each book instance calculates its word count.
-- **Themes Extraction**: Identifies key themes in a book using word frequency.
-- **CSV to Dictionary**: A separate function that converts a CSV file into a dictionary of books.
+- **Counts**: Each book instance calculates its page count, word count, and word frequency.
+- **Themes Extraction**: Infers key themes in a book using word frequency.
+- **CSV to Dictionary**: A separate function that converts a CSV file into a dictionary of books for ease of import.
 
 ## Authors
 
