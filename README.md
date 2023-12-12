@@ -1,6 +1,6 @@
 # Book Management System
 
-This Python package provides an extensive framework for managing a library of books. It leverages several libraries such as `isbnlib`, `nltk`, and `matplotlib` for various features like ISBN validation, text analysis, and data visualization.
+This Python package provides an extensive framework for managing a library of books. It leverages several libraries (`isbnlib`, `nltk`, and `matplotlib`) for various features like ISBN validation, text analysis, and data visualization.
 
 ## Features
 
@@ -9,18 +9,23 @@ This Python package provides an extensive framework for managing a library of bo
 - **Text Analysis**: Employs `nltk` for stopwords removal, lemmatization, and tokenization.
 - **Data Visualization**: Uses `matplotlib` to plot frequency of authors and genres.
 - **CSV Export and Import**: Functionality to export library data to CSV and import from it.
-- **Advanced Book Search**: Ability to search for books by titles or quotes within them.
+- **Advanced Book Search**: Ability to search for books by titles or quotations within them.
 - **Reading Progress Tracking**: Bookmark functionality to track reading progress.
 - **Favorites Management**: Ability to mark books as favorites and list them.
 
 ## Installation
 
-This package requires Python 3.x. Dependencies include `isbnlib`, `nltk`, `matplotlib`, and `csv`, all listed in the requirments.txt file. To install these dependencies, navigate to the folder containing requirements.txt and use the following command:
+This package requires Python 3.x. Dependencies include `isbnlib`, `nltk`, and `matplotlib`, all listed in the requirments.txt file. To install these dependencies, navigate to the folder containing requirements.txt and use the following command:
 
 ```bash
 pip install -r requirements.txt
 ```
-
+Furthermore, download the following dependencies from the nltk package with the following commands:
+```bash
+nltk.download('stopwords')
+nltk.download('averaged_perceptron_tagger')
+nltk.download('wordnet')
+```
 ## Usage
 
 ### Initializing the Library
